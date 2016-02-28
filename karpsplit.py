@@ -23,7 +23,7 @@ def sslsplit():
 
 
 def read_output(pipe):
-    rp = open(pipe, 'r', encoding="utf8")
+    rp = open(pipe, 'r')
     # https://regex101.com/r/wA9oY4/1
 
     # infinite loop
