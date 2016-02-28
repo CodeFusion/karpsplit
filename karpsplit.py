@@ -7,7 +7,8 @@ import time
 
 def arpspoof(target = None):
     gws = netifaces.gateways()
-    gateway = gws['default'][netifaces.AF_INET]
+    gateway = gws['default'][netifaces.AF_INET][0]
+    print("Found gateway " + gateway)
     interface = "eth0"
     if target is None:
         spoofer = subprocess.call(["arpspoof", "-i " + interface, gateway])
