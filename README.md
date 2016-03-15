@@ -1,7 +1,9 @@
 # karpsplit
 Python 3 container script for ARP Spoofing and SSLSplit
 
-
+## Prerequisites
+- Ettercap
+- SSLSplit
 
 ## Usage
 - Create your own CA certificate (good instructions are available at https://jamielinux.com/docs/openssl-certificate-authority/, follow until you've signed the server certificate )
